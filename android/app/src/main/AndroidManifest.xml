@@ -18,6 +18,11 @@
                 android:value="Displays battery temperature indicator in Android status bar" />
         </service>
 
+        <receiver
+            android:name=".BatteryMonitorDismissReceiver"
+            android:exported="false" />
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

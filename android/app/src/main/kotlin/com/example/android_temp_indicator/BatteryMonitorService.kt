@@ -158,11 +158,21 @@ class BatteryMonitorService : Service() {
         val voltStr = data.voltage?.let { String.format(Locale.US, " • %.2fV", it) } ?: ""
         val chargingStatus = if (data.isCharging) data.chargingType ?: "Charging" else "Discharging"
 
+        val deleteIntent = Intent(this, BatteryMonitorDismissReceiver::class.java)
+        val pendingDeleteIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            deleteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         builder.apply {
             setContentTitle("🌡 Battery: $tempStr")
             setContentText("Level: ${data.percentage}% • $chargingStatus$voltStr")
             setContentIntent(pendingIntent)
+            setDeleteIntent(pendingDeleteIntent)
             setOngoing(true)
+            setAutoCancel(false)
             setOnlyAlertOnce(true)
             setVisibility(Notification.VISIBILITY_PUBLIC)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -170,7 +180,13 @@ class BatteryMonitorService : Service() {
             }
         }
 
-        return builder.build()
+        val notification = builder.build()
+        // Lock notification with ongoing flags to prevent user swiping it away
+        notification.flags = notification.flags or
+                Notification.FLAG_ONGOING_EVENT or
+                Notification.FLAG_NO_CLEAR
+
+        return notification
     }
 
     private fun createNotificationChannel() {
