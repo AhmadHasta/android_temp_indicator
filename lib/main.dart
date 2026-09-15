@@ -168,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         setState(() => _isMonitoring = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Monitoring dihentikan.'),
+            content: Text('Monitoring stopped.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -180,7 +180,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-                'Monitoring aktif! Suhu sekarang muncul di status bar.'),
+                'Monitoring active! Temperature is now visible in the status bar.'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -227,12 +227,12 @@ class _DashboardScreenState extends State<DashboardScreen>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Perbarui Data',
+            tooltip: 'Refresh',
             onPressed: _fetchCurrentState,
           ),
           IconButton(
             icon: const Icon(Icons.info_outline_rounded),
-            tooltip: 'Tips HyperOS',
+            tooltip: 'HyperOS Tips',
             onPressed: () => _showHyperOSTipsDialog(context),
           ),
         ],
@@ -280,7 +280,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Text(
-                    'Izin Notifikasi Dibutuhkan',
+                    'Notification Permission Required',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -288,7 +288,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                   SizedBox(height: 2),
                   Text(
-                    'Diperlukan agar indikator suhu dapat tampil di status bar.',
+                    'Required to display the temperature indicator in the status bar.',
                     style: TextStyle(color: Color(0xFFFED7AA), fontSize: 12),
                   ),
                 ],
@@ -302,7 +302,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              child: const Text('Izinkan', style: TextStyle(fontSize: 12)),
+              child: const Text('Grant', style: TextStyle(fontSize: 12)),
             ),
           ],
         ),
@@ -343,8 +343,8 @@ class _DashboardScreenState extends State<DashboardScreen>
           const SizedBox(width: 10),
           Text(
             _isMonitoring
-                ? 'Status Bar Monitoring: AKTIF'
-                : 'Status Bar Monitoring: NONAKTIF',
+                ? 'Status Bar Monitoring: ACTIVE'
+                : 'Status Bar Monitoring: INACTIVE',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -353,7 +353,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           ),
           const Spacer(),
           Text(
-            _isMonitoring ? 'Berjalan' : 'Berhenti',
+            _isMonitoring ? 'Running' : 'Stopped',
             style: TextStyle(
               fontSize: 12,
               color: statusColor.withAlpha(200),
@@ -379,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'SUHU BATERAI',
+                  'BATTERY TEMPERATURE',
                   style: TextStyle(
                     fontSize: 12,
                     letterSpacing: 1.2,
@@ -473,15 +473,15 @@ class _DashboardScreenState extends State<DashboardScreen>
       childAspectRatio: 1.6,
       children: [
         _buildStatCard(
-          title: 'Persentase',
+          title: 'Battery Level',
           value: '$percentage%',
-          subtitle: isCharging ? 'Sedang diisi' : 'Penggunaan baterai',
+          subtitle: isCharging ? 'Charging' : 'On battery',
           icon: isCharging ? Icons.battery_charging_full : Icons.battery_std,
           accentColor: const Color(0xFF38BDF8),
         ),
         _buildStatCard(
-          title: 'Status Pengisian',
-          value: isCharging ? 'Mengisi Daya' : 'Tidak Mengisi',
+          title: 'Charging Status',
+          value: isCharging ? 'Charging' : 'Not Charging',
           subtitle: chargingType,
           icon: isCharging ? Icons.bolt_rounded : Icons.power_off_rounded,
           accentColor: isCharging
@@ -489,18 +489,18 @@ class _DashboardScreenState extends State<DashboardScreen>
               : const Color(0xFF64748B),
         ),
         _buildStatCard(
-          title: 'Tegangan (Voltage)',
+          title: 'Voltage',
           value: voltage != null
               ? '${voltage.toStringAsFixed(2)} V'
-              : 'Tidak tersedia',
-          subtitle: 'Kondisi cell baterai',
+              : 'Unavailable',
+          subtitle: 'Cell condition',
           icon: Icons.electric_meter_rounded,
           accentColor: const Color(0xFFA855F7),
         ),
         _buildStatCard(
-          title: 'Kesehatan Baterai',
+          title: 'Battery Health',
           value: health,
-          subtitle: 'Laporan sensor Android',
+          subtitle: 'Reported by sensor',
           icon: Icons.health_and_safety_rounded,
           accentColor: health == 'Good'
               ? const Color(0xFF10B981)
@@ -600,8 +600,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                     children: [
                       Text(
                         _isMonitoring
-                            ? 'Foreground Service Aktif'
-                            : 'Monitoring Siap Dijalankan',
+                            ? 'Foreground Service Active'
+                            : 'Ready to Monitor',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -610,8 +610,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       const SizedBox(height: 2),
                       Text(
                         _isMonitoring
-                            ? 'Suhu tampil di status bar. Aplikasi dapat ditutup.'
-                            : 'Nyalakan untuk menampilkan suhu di status bar.',
+                            ? 'Temperature is displayed in status bar. App can be closed.'
+                            : 'Turn on to display temperature in status bar.',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF94A3B8),
@@ -668,7 +668,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'PREVIEW STATUS BAR',
+              'STATUS BAR PREVIEW',
               style: TextStyle(
                 fontSize: 11,
                 letterSpacing: 1.1,
@@ -736,7 +736,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             const SizedBox(height: 8),
             const Text(
-              'Indikator suhu tampil di samping jam (area notifikasi status bar) via ongoing notification small icon tanpa memerlukan overlay window.',
+              'Temperature indicator appears beside the clock (status bar notification area) via an ongoing notification small icon without requiring overlay permissions.',
               style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
             ),
           ],
@@ -760,7 +760,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Catatan untuk Xiaomi / Poco (HyperOS)',
+                    'Notice for Xiaomi / Poco (HyperOS)',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -768,14 +768,14 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Agar monitoring tetap berjalan saat layar mati di HyperOS, atur Battery Saver aplikasi ke "No restrictions" dan beri izin "Autostart".',
+                    'To ensure monitoring continues with screen off on HyperOS, set Battery Saver to "No restrictions" and enable "Autostart".',
                     style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
                   ),
                   const SizedBox(height: 6),
                   InkWell(
                     onTap: () => _showHyperOSTipsDialog(context),
                     child: const Text(
-                      'Lihat petunjuk lengkap →',
+                      'View setup instructions →',
                       style: TextStyle(
                         fontSize: 11,
                         color: Color(0xFF38BDF8),
@@ -800,7 +800,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           children: [
             Icon(Icons.phone_android_rounded, color: Color(0xFF38BDF8)),
             SizedBox(width: 8),
-            Text('Tips Xiaomi / HyperOS', style: TextStyle(fontSize: 17)),
+            Text('Xiaomi / HyperOS Setup Tips', style: TextStyle(fontSize: 17)),
           ],
         ),
         content: const SingleChildScrollView(
@@ -809,22 +809,22 @@ class _DashboardScreenState extends State<DashboardScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Sistem HyperOS / MIUI memiliki manajemen baterai yang agresif. Ikuti langkah berikut agar status bar monitor tidak tertutup otomatis:',
+                'HyperOS / MIUI has aggressive battery management. Follow these steps to prevent the system from terminating background monitoring:',
                 style: TextStyle(fontSize: 13),
               ),
               SizedBox(height: 12),
               Text(
-                '1. Battery Saver:\nBuka App Info > Battery saver > Pilih "No restrictions" (Tidak ada batasan).',
+                '1. Battery Saver:\nGo to App Info > Battery saver > Select "No restrictions".',
                 style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
               ),
               SizedBox(height: 8),
               Text(
-                '2. Autostart:\nBuka App Info > Aktifkan toggle "Autostart".',
+                '2. Autostart:\nGo to App Info > Enable "Autostart".',
                 style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
               ),
               SizedBox(height: 8),
               Text(
-                '3. Lock di Recent Apps:\nBuka Recent Apps > Tahan aplikasi Battery Monitor > Ketuk ikon Gembok (Lock).',
+                '3. Lock in Recents:\nOpen Recent Apps > Long-press Battery Monitor > Tap the Lock icon.',
                 style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
               ),
             ],
@@ -833,7 +833,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Mengerti'),
+            child: const Text('Got it'),
           ),
         ],
       ),
