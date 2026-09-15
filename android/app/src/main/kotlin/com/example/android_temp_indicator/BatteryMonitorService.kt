@@ -18,7 +18,7 @@ import kotlin.math.abs
 class BatteryMonitorService : Service() {
 
     companion object {
-        const val CHANNEL_ID = "battery_temp_monitor_channel"
+        const val CHANNEL_ID = "battery_temp_monitor_channel_v2"
         const val NOTIFICATION_ID = 1001
 
         const val ACTION_START = "com.example.android_temp_indicator.ACTION_START"
@@ -175,6 +175,8 @@ class BatteryMonitorService : Service() {
             setAutoCancel(false)
             setOnlyAlertOnce(true)
             setVisibility(Notification.VISIBILITY_PUBLIC)
+            @Suppress("DEPRECATION")
+            setPriority(Notification.PRIORITY_MAX)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 setCategory(Notification.CATEGORY_STATUS)
             }
@@ -191,16 +193,24 @@ class BatteryMonitorService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Remove legacy low-priority channel if present
+            try {
+                notificationManager?.deleteNotificationChannel("battery_temp_monitor_channel")
+            } catch (e: Exception) {
+                // Ignore
+            }
+
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Battery Temperature Monitor",
-                NotificationManager.IMPORTANCE_LOW // Low priority: shows in status bar without sound/vibration
+                NotificationManager.IMPORTANCE_HIGH // High priority: prioritizes notification to the top of shade
             ).apply {
-                description = "Shows live battery temperature in status bar"
+                description = "Shows live battery temperature at the top of the notification shade"
                 setShowBadge(false)
                 enableLights(false)
                 enableVibration(false)
                 setSound(null, null)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
             notificationManager?.createNotificationChannel(channel)
         }
