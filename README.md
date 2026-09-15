@@ -35,13 +35,16 @@ You can download and install the application directly onto your Android device w
 
 ---
 
-## 📱 Screenshots & Architecture
+## 📱 Status Bar & Architecture
 
 ```text
 ┌─────────────────────────────────────────────┐
-│ 12:30       📶 38°       🔋 72%             │  <- Status Bar Small Icon
+│ 12:30 38°                   📶 🔋 72%       │  <- Live Status Bar Temperature Icon
 └─────────────────────────────────────────────┘
 ```
+
+> **Note on Status Bar Placement**: The temperature indicator appears directly beside the clock in the Android status bar notification icon area using a dynamic monochrome `smallIcon`. This leverages Android's native `ForegroundService` and `NotificationManager` for lightweight, battery-efficient operation without requiring intrusive floating overlay (`SYSTEM_ALERT_WINDOW`) permissions.
+
 
 ```text
 ┌───────────────────────────────┐

@@ -695,8 +695,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: Colors.white70,
                     ),
                   ),
-                  const Spacer(),
-                  // Simulated status bar temperature icon
+                  const SizedBox(width: 6),
+                  // Simulated status bar temperature icon (beside clock)
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 4, vertical: 1),
@@ -713,7 +713,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const Spacer(),
                   const Icon(Icons.signal_cellular_4_bar_rounded,
                       size: 14, color: Colors.white70),
                   const SizedBox(width: 4),
@@ -736,7 +736,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             const SizedBox(height: 8),
             const Text(
-              'Indikator suhu dibuat dinamis via ongoing notification small icon tanpa memerlukan overlay window.',
+              'Indikator suhu tampil di samping jam (area notifikasi status bar) via ongoing notification small icon tanpa memerlukan overlay window.',
               style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
             ),
           ],
