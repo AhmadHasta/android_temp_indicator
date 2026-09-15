@@ -1,9 +1,5 @@
 # Battery Temperature Monitor (Android)
 
-<p align="center">
-  <img src="assets/images/banner.png" alt="Battery Temperature Monitor Showcase" width="100%">
-</p>
-
 A lightweight, battery-efficient Android battery temperature monitor using **Flutter** for the dashboard UI and **Kotlin Foreground Service** for continuous background monitoring directly in the Android status bar.
 
 
