@@ -23,6 +23,7 @@ class BatteryMonitorService : Service() {
 
         const val ACTION_START = "com.example.android_temp_indicator.ACTION_START"
         const val ACTION_STOP = "com.example.android_temp_indicator.ACTION_STOP"
+        const val ACTION_UPDATE_NOTIFICATION = "com.example.android_temp_indicator.ACTION_UPDATE_NOTIFICATION"
 
         private const val PREFS_NAME = "battery_monitor_prefs"
         private const val KEY_IS_ACTIVE = "is_monitoring_active"
@@ -71,6 +72,15 @@ class BatteryMonitorService : Service() {
         if (intent?.action == ACTION_STOP) {
             stopMonitoringService()
             return START_NOT_STICKY
+        }
+
+        if (intent?.action == ACTION_UPDATE_NOTIFICATION) {
+            if (isMonitoringActive(this)) {
+                val currentBattery = BatteryInfoHelper.getBatteryData(this)
+                val updatedNotification = buildNotification(currentBattery)
+                notificationManager?.notify(NOTIFICATION_ID, updatedNotification)
+            }
+            return START_STICKY
         }
 
         setMonitoringActive(this, true)
@@ -155,8 +165,26 @@ class BatteryMonitorService : Service() {
         }
 
         val tempStr = String.format(Locale.US, "%.1f°C", data.temperature)
-        val voltStr = data.voltage?.let { String.format(Locale.US, " • %.2fV", it) } ?: ""
-        val chargingStatus = if (data.isCharging) data.chargingType ?: "Charging" else "Discharging"
+
+        val prefs = BatteryPreferences.getPreferences(this)
+        val items = mutableListOf<String>()
+        if (prefs.showBatteryLevel) {
+            items.add("Level: ${data.percentage}%")
+        }
+        if (prefs.showChargingStatus) {
+            val chargingStatus = if (data.isCharging) data.chargingType ?: "Charging" else "Discharging"
+            items.add(chargingStatus)
+        }
+        if (prefs.showVoltage) {
+            data.voltage?.let {
+                items.add(String.format(Locale.US, "%.2fV", it))
+            }
+        }
+        val contentText = if (items.isNotEmpty()) {
+            items.joinToString(" • ")
+        } else {
+            null
+        }
 
         val deleteIntent = Intent(this, BatteryMonitorDismissReceiver::class.java)
         val pendingDeleteIntent = PendingIntent.getBroadcast(
@@ -168,7 +196,7 @@ class BatteryMonitorService : Service() {
 
         builder.apply {
             setContentTitle("🌡 Battery: $tempStr")
-            setContentText("Level: ${data.percentage}% • $chargingStatus$voltStr")
+            setContentText(contentText)
             setContentIntent(pendingIntent)
             setDeleteIntent(pendingDeleteIntent)
             setOngoing(true)

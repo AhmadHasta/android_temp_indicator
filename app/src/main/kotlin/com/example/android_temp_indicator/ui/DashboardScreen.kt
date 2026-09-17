@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.android_temp_indicator.BatteryData
+import com.example.android_temp_indicator.DisplayPreferences
 import com.example.android_temp_indicator.TemperatureStatus
 import com.example.android_temp_indicator.ui.theme.*
 import java.util.Locale
@@ -35,9 +36,11 @@ fun DashboardScreen(
     batteryData: BatteryData,
     isMonitoring: Boolean,
     hasNotificationPermission: Boolean,
+    displayPreferences: DisplayPreferences,
     onRequestNotificationPermission: () -> Unit,
     onToggleMonitoring: () -> Unit,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onUpdatePreferences: (DisplayPreferences) -> Unit
 ) {
     var showHyperOSTips by remember { mutableStateOf(false) }
 
@@ -103,6 +106,13 @@ fun DashboardScreen(
             MonitoringControlCard(
                 isMonitoring = isMonitoring,
                 onToggleMonitoring = onToggleMonitoring
+            )
+
+            // Notification Info Settings Card
+            NotificationInfoSettingsCard(
+                preferences = displayPreferences,
+                batteryData = batteryData,
+                onUpdatePreferences = onUpdatePreferences
             )
 
             // Status Bar Preview Card
@@ -520,6 +530,279 @@ private fun MonitoringControlCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun NotificationInfoSettingsCard(
+    preferences: DisplayPreferences,
+    batteryData: BatteryData,
+    onUpdatePreferences: (DisplayPreferences) -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = Slate800),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Slate700),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "NOTIFICATION DISPLAY INFO",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        letterSpacing = 1.1.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Slate400
+                    )
+                )
+                Icon(
+                    Icons.Rounded.Tune,
+                    contentDescription = null,
+                    tint = Slate400,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                "Customize which secondary details are displayed in the status bar notification.",
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    color = Slate400
+                )
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Toggle 1: Battery Level
+            SettingToggleRow(
+                icon = Icons.Rounded.BatteryChargingFull,
+                iconColor = Sky400,
+                title = "Battery Level",
+                subtitle = "Show battery percentage (e.g. ${if (batteryData.percentage > 0) batteryData.percentage else 75}%)",
+                checked = preferences.showBatteryLevel,
+                onCheckedChange = { checked ->
+                    onUpdatePreferences(preferences.copy(showBatteryLevel = checked))
+                }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 10.dp),
+                color = Slate700.copy(alpha = 0.5f),
+                thickness = 0.8.dp
+            )
+
+            // Toggle 2: Charging Status
+            SettingToggleRow(
+                icon = Icons.Rounded.Bolt,
+                iconColor = StatusActive,
+                title = "Charging Status",
+                subtitle = "Show state (${if (batteryData.isCharging) batteryData.chargingType ?: "Charging" else "Discharging"})",
+                checked = preferences.showChargingStatus,
+                onCheckedChange = { checked ->
+                    onUpdatePreferences(preferences.copy(showChargingStatus = checked))
+                }
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 10.dp),
+                color = Slate700.copy(alpha = 0.5f),
+                thickness = 0.8.dp
+            )
+
+            // Toggle 3: Voltage
+            SettingToggleRow(
+                icon = Icons.Rounded.ElectricMeter,
+                iconColor = VoltagePurple,
+                title = "Battery Voltage",
+                subtitle = "Show cell voltage (${batteryData.voltage?.let { String.format(Locale.US, "%.2f V", it) } ?: "4.15 V"})",
+                checked = preferences.showVoltage,
+                onCheckedChange = { checked ->
+                    onUpdatePreferences(preferences.copy(showVoltage = checked))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Live Notification Shade Preview Box
+            Text(
+                "NOTIFICATION PREVIEW",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    letterSpacing = 1.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Slate500
+                )
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            val tempStr = if (batteryData.temperature > 0) {
+                String.format(Locale.US, "%.1f°C", batteryData.temperature)
+            } else {
+                "38.5°C"
+            }
+
+            val items = mutableListOf<String>()
+            if (preferences.showBatteryLevel) {
+                val pct = if (batteryData.percentage > 0) batteryData.percentage else 75
+                items.add("Level: $pct%")
+            }
+            if (preferences.showChargingStatus) {
+                val status = if (batteryData.isCharging) batteryData.chargingType ?: "Charging" else "Discharging"
+                items.add(status)
+            }
+            if (preferences.showVoltage) {
+                val volt = batteryData.voltage ?: 4.15
+                items.add(String.format(Locale.US, "%.2fV", volt))
+            }
+            val previewContentText = if (items.isNotEmpty()) items.joinToString(" • ") else null
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF0B1329))
+                    .border(BorderStroke(1.dp, Slate700.copy(alpha = 0.6f)), RoundedCornerShape(12.dp))
+                    .padding(12.dp)
+            ) {
+                Row(verticalAlignment = Alignment.Top) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(Sky600.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Rounded.NotificationsActive,
+                            contentDescription = null,
+                            tint = Sky400,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Battery Temperature",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Slate400
+                                )
+                            )
+                            Text(
+                                "now",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    color = Slate500
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Text(
+                            "🌡 Battery: $tempStr",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        )
+
+                        if (!previewContentText.isNullOrEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                previewContentText,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    color = Slate400
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingToggleRow(
+    icon: ImageVector,
+    iconColor: Color,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(iconColor.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = iconColor,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                title,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    color = Slate400
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = Sky500,
+                uncheckedThumbColor = Slate400,
+                uncheckedTrackColor = Slate700,
+                uncheckedBorderColor = Color.Transparent
+            )
+        )
     }
 }
 

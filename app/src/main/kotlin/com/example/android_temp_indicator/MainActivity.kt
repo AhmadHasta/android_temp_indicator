@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     private var isMonitoring by mutableStateOf(false)
     private var hasNotificationPermission by mutableStateOf(true)
+    private var displayPreferences by mutableStateOf(DisplayPreferences())
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -56,6 +57,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        displayPreferences = BatteryPreferences.getPreferences(this)
         checkNotificationPermission()
         refreshBatteryState()
 
@@ -65,9 +67,11 @@ class MainActivity : ComponentActivity() {
                     batteryData = batteryData,
                     isMonitoring = isMonitoring,
                     hasNotificationPermission = hasNotificationPermission,
+                    displayPreferences = displayPreferences,
                     onRequestNotificationPermission = { requestNotificationPermission() },
                     onToggleMonitoring = { toggleMonitoring() },
-                    onRefresh = { refreshBatteryState() }
+                    onRefresh = { refreshBatteryState() },
+                    onUpdatePreferences = { updateDisplayPreferences(it) }
                 )
             }
         }
@@ -75,6 +79,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        displayPreferences = BatteryPreferences.getPreferences(this)
         registerBatteryReceiver()
         refreshBatteryState()
     }
@@ -169,6 +174,21 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Monitoring stopped.", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(this, "Failed to stop service: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateDisplayPreferences(newPrefs: DisplayPreferences) {
+        displayPreferences = newPrefs
+        BatteryPreferences.savePreferences(this, newPrefs)
+        if (isMonitoring) {
+            try {
+                val intent = Intent(this, BatteryMonitorService::class.java).apply {
+                    action = BatteryMonitorService.ACTION_UPDATE_NOTIFICATION
+                }
+                startService(intent)
+            } catch (e: Exception) {
+                // Service may not be actively running
+            }
         }
     }
 }
